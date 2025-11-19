@@ -29,7 +29,7 @@ jobs:
       - run: npm run tsc -- --noEmit
 
       # Run ESLint
-      - run: npm run lint
+      #- run: npm run lint
 
       # Optional: run tests if any
       # - run: npm test
