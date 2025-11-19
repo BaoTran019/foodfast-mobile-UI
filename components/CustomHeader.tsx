@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+    borderRadius: 8,
   },
 
   backButton: {
@@ -60,11 +61,12 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    position: "absolute",
-    left: "50%",
-    transform: [{ translateX: -100 }], // Because translateX needs static number
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
-  },
+  position: "absolute",
+  left: 0,
+  right: 0,
+  textAlign: "center",
+  fontSize: 18,
+  fontWeight: "600",
+  color: "#111827",
+}
 });
