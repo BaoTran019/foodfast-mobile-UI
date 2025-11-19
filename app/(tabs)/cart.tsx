@@ -3,8 +3,10 @@ import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import { useCartStore } from "@/store/cart.store";
 import { PaymentInfoStripeProps } from "@/type";
+import { router } from "expo-router";
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfoStripeProps) => (
   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 4 }}>
@@ -62,7 +64,11 @@ const Cart = () => {
               />
             </View>
 
-            <CustomButton title="Order Now" />
+            <CustomButton
+              title="Continue to Order"
+              onPress={() => router.push("../createOrders")}
+            />
+
           </View>
         )}
       />

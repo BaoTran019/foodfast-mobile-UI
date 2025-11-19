@@ -67,14 +67,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon title="Orders" icon={images.person} focused={focused} />
-          ),
-        }}
-      />
     </Tabs>
   );
 }
@@ -84,13 +76,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 40,
     marginHorizontal: 20,
-    height: 70,
+    height: 65,
     borderRadius: 50,
     backgroundColor: "#fff",
     flexDirection: "row",
     justifyContent: "space-around", // chia đều các icon
     alignItems: "center", // căn giữa theo chiều dọc
-    paddingHorizontal: 10, // khoảng cách 2 bên
+    paddingTop: 15,
   },
   nativeShadow: {
     shadowColor: "#1a1a1a",

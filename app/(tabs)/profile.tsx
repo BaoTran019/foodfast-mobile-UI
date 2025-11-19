@@ -32,8 +32,6 @@ const Profile = () => {
                         })
                     }
                 />
-                <ProfileItem label="Payment Methods" />
-                <ProfileItem label="Delivery Address" />
                 <ProfileItem label="Help & Support" />
                 <ProfileItem label="Settings" />
             </View>
