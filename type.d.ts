@@ -1,3 +1,5 @@
+import { StyleProp, TextStyle } from 'react-native';
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -56,8 +58,8 @@ export interface TabBarIconProps {
 export interface PaymentInfoStripeProps {
   label: string;
   value: string;
-  labelStyle?: string;
-  valueStyle?: string;
+  labelStyle?: StyleProp<TextStyle>;
+  valueStyle?: StyleProp<TextStyle>;
 }
 
 export interface CustomButtonProps {
