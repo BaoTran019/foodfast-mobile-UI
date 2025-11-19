@@ -1,59 +1,32 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { useFonts } from "expo-font";
+import { SplashScreen, Stack } from "expo-router";
+import { useEffect } from "react";
 
-import { useColorScheme } from '@/components/useColorScheme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import useAuthStore from "@/store/auth.store";
+import "./globals.css";
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+  const { isLoading, fetchAuthenticatedUser } = useAuthStore();
+
+  const [fontsLoaded, error] = useFonts({
+    "QuickSand-Bold": require("../assets/fonts/Quicksand-Bold.ttf"),
+    "QuickSand-Medium": require("../assets/fonts/Quicksand-Medium.ttf"),
+    "QuickSand-Regular": require("../assets/fonts/Quicksand-Regular.ttf"),
+    "QuickSand-SemiBold": require("../assets/fonts/Quicksand-SemiBold.ttf"),
+    "QuickSand-Light": require("../assets/fonts/Quicksand-Light.ttf"),
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
-  }, [error]);
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded, error]);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    fetchAuthenticatedUser();
+  }, []);
 
-  if (!loaded) {
-    return null;
-  }
+  // Khi fonts chưa load hoặc auth loading → return null
+  if (!fontsLoaded || isLoading) return null;
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

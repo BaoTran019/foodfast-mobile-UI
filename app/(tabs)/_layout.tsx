@@ -1,59 +1,120 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { images } from "@/constants";
+import { TabBarIconProps } from "@/type";
+import { Tabs } from "expo-router";
+import { Image, Platform, StyleSheet, Text, View } from "react-native";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => {
+  return (
+    <View style={styles.iconContainer}>
+      <Image
+        source={icon}
+        style={[styles.icon, { tintColor: focused ? "#FE8C00" : "#5D5F6D" }]}
+        resizeMode="contain"
+      />
+      <Text
+        style={[
+          styles.iconLabel,
+          { color: focused ? "#FE8C00" : "#878787" },
+        ]}
+      >
+        {title}
+      </Text>
+    </View>
+  );
+};
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarStyle: [
+          styles.tabBar,
+          Platform.OS === "web" ? styles.webShadow : styles.nativeShadow,
+        ],
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon title="Home" icon={images.home} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="search"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon title="Search" icon={images.search} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="cart"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon title="Cart" icon={images.bag} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon title="Profile" icon={images.person} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="orders"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon title="Orders" icon={images.person} focused={focused} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    position: "absolute",
+    bottom: 40,
+    marginHorizontal: 20,
+    height: 70,
+    borderRadius: 50,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    justifyContent: "space-around", // chia đều các icon
+    alignItems: "center", // căn giữa theo chiều dọc
+    paddingHorizontal: 10, // khoảng cách 2 bên
+  },
+  nativeShadow: {
+    shadowColor: "#1a1a1a",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  webShadow: {
+    boxShadow: "0px 2px 4px rgba(0,0,0,0.1)",
+  },
+  iconContainer: {
+    flex: 1,
+    justifyContent: "center", // căn giữa theo chiều dọc
+    alignItems: "center",
+  },
+  icon: {
+    width: 28,
+    height: 28,
+  },
+  iconLabel: {
+    fontSize: 9,
+    fontWeight: "700",
+    marginTop: 2,
+    textAlign: "center",
+  },
+});
