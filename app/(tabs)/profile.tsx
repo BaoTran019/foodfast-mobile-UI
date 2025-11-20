@@ -17,8 +17,8 @@ const Profile = () => {
                     source={{ uri: "https://i.pravatar.cc/150?u=" + user.id }}
                     style={styles.avatar}
                 />
-                <Text style={styles.name}>{user.name}</Text>
-                <Text style={styles.email}>{user.email}</Text>
+                <Text style={styles.name}>Nguyễn Văn A</Text>
+                <Text style={styles.email}>a@gmail.com</Text>
             </View>
 
             {/* Menu Section */}

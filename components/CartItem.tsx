@@ -1,4 +1,5 @@
 import { images } from "@/constants";
+import temp_img from "@/public/menu/chickens/combo_1_mieng_ga_gion.jpg";
 import { useCartStore } from "@/store/cart.store";
 import { CartItemType } from "@/type";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -7,11 +8,13 @@ const CartItem = ({ item }: { item: CartItemType }) => {
   const { increaseQty, decreaseQty, removeItem } = useCartStore();
   console.log("IMG:", item.image);
 
+  const userId = 1
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         <Image
-          source={item.image }
+          source={temp_img}
           style={styles.image}
           resizeMode="cover"
         />
@@ -22,7 +25,7 @@ const CartItem = ({ item }: { item: CartItemType }) => {
 
           <View style={styles.actionsRow}>
             <TouchableOpacity
-              onPress={() => decreaseQty(item.id, item.customizations!)}
+              onPress={async () => await decreaseQty(item.id)}
               style={styles.actionBtn}
             >
               <Image
@@ -35,7 +38,7 @@ const CartItem = ({ item }: { item: CartItemType }) => {
             <Text style={styles.quantity}>{item.quantity}</Text>
 
             <TouchableOpacity
-              onPress={() => increaseQty(item.id, item.customizations!)}
+              onPress={async () => await increaseQty(item.id)}
               style={styles.actionBtn}
             >
               <Image
@@ -49,7 +52,7 @@ const CartItem = ({ item }: { item: CartItemType }) => {
       </View>
 
       <TouchableOpacity
-        onPress={() => removeItem(item.id, item.customizations!)}
+        onPress={async () => await removeItem(item.id)}
         style={styles.removeBtn}
       >
         <Image source={images.trash} style={styles.trashIcon} resizeMode="contain" />

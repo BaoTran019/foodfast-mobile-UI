@@ -1,17 +1,42 @@
-// app/(tabs)/orderDetail.tsx
+import { getMenu } from "@/lib/getMenu";
+import { getOrders } from "@/lib/getOrders";
+import temp_img from "@/public/menu/chickens/combo_1_mieng_ga_gion.jpg";
 import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { FlatList, Image, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { food_list } from "../assets/assets"; // import file món ăn
-import { initial_orders, order_items } from "../assets/mock_data/orders"; // import file order_items
 
 
 const OrderDetail = () => {
   const params = useLocalSearchParams<{ orderId: string }>();
   const orderId = Number(params.orderId);
+  const [order, setOrder] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
 
-  // Lấy order hiện tại
-  const order = initial_orders.find(o => o.orderId === orderId);
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const [orders, menu] = await Promise.all([
+          getOrders(),
+          getMenu()       
+        ]);
+        const currentOrder = orders.find(o => o.orderId === orderId);
+        if (currentOrder) {
+          setOrder(currentOrder);
+          setItems(
+            currentOrder.orderItems.map((i: any) => ({
+              ...i,
+              food: menu.find(f => f.id === i.productId)
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Failed to fetch order:", err);
+      }
+    };
+
+    fetchOrder();
+  }, [orderId]);
 
   if (!order) {
     return (
@@ -22,18 +47,9 @@ const OrderDetail = () => {
       </SafeAreaView>
     );
   }
-
-  // Lọc item của order hiện tại
-  const items = order_items
-    .filter(i => i.orderId === orderId)
-    .map(i => ({
-      ...i,
-      food: food_list.find(f => f.id === i.itemId)
-    }));
-
   const DELIVERY_FEE = 15000;
-  const itemsTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
-  const total = itemsTotal + DELIVERY_FEE;
+  const subtotal = (price: number, quantity: number) => price * quantity;
+  const total = order.totalPrice + DELIVERY_FEE;
 
   const insets = useSafeAreaInsets();
   return (
@@ -54,19 +70,19 @@ const OrderDetail = () => {
               <Text style={styles.backButton} onPress={() => router.back()}>
                 ← Back
               </Text>
-              
+
               <View style={styles.headerBox}>
 
                 <Text style={styles.headerText}>Order #{order.orderId}</Text>
 
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Customer:</Text>
-                  <Text style={styles.infoValue}>{order.customer}</Text>
+                  <Text style={styles.infoValue}>{order.recipientName}</Text>
                 </View>
 
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Phone:</Text>
-                  <Text style={styles.infoValue}>{order.phone}</Text>
+                  <Text style={styles.infoValue}>{order.recipientPhone}</Text>
                 </View>
 
                 {order.address && (
@@ -81,15 +97,15 @@ const OrderDetail = () => {
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Image
-                source={item.food?.image}
+                source={temp_img}
                 style={styles.image}
                 resizeMode="contain"
               />
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.name}>{item.food?.name}</Text>
+                <Text style={styles.name}>{item.productName}</Text>
                 <Text>Quantity: {item.quantity}</Text>
                 <Text>Price: {(item.price || 0).toLocaleString("vi-VN")}đ</Text>
-                <Text>Subtotal: {(item.subtotal || 0).toLocaleString("vi-VN")}đ</Text>
+                <Text>Subtotal: {subtotal(item.price, item.quantity).toLocaleString("vi-VN")}đ</Text>
               </View>
             </View>
           )}
@@ -98,7 +114,7 @@ const OrderDetail = () => {
               <View style={styles.footerRow}>
                 <Text style={styles.footerLabel}>Items total:</Text>
                 <Text style={styles.footerValue}>
-                  {itemsTotal.toLocaleString("vi-VN")}đ
+                  {order.totalPrice.toLocaleString("vi-VN")}đ
                 </Text>
               </View>
 

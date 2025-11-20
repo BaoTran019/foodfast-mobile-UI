@@ -18,7 +18,7 @@ const Filter = ({ categories }: FilterProps) => {
     else router.setParams({ category });
   };
 
-  const filterData = ["all", ...categories];
+  const filterData = ["all", ...categories.filter(cat => cat.toLowerCase() !== "all")];
 
   return (
     <FlatList

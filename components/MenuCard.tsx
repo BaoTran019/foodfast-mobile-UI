@@ -1,3 +1,4 @@
+import temp_img from "@/public/menu/chickens/combo_1_mieng_ga_gion.jpg";
 import { useCartStore } from "@/store/cart.store";
 import { MenuItem } from "@/type";
 import { Image, Platform, Text, TouchableOpacity } from "react-native";
@@ -24,7 +25,7 @@ const MenuCard = ({ item }: { item: MenuItem }) => {
     >
       {/* Image */}
       <Image
-        source={image}
+        source={temp_img}
         style={{
           width: 130,      // kích thước nhỏ hơn
           height: 130,
@@ -51,7 +52,7 @@ const MenuCard = ({ item }: { item: MenuItem }) => {
 
       {/* Add to Cart */}
       <TouchableOpacity
-        onPress={() => addItem({ id, name, price, image, customizations: [] })}
+        onPress={async () => await addItem(id)}
         style={{
           paddingVertical: 4,
           paddingHorizontal: 12,

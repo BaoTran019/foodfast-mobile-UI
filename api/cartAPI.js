@@ -1,4 +1,4 @@
-import config from './config.json'
+import config from './config.json';
 
 const {SERVER_API} = config
 const BASE_URL = `${SERVER_API}/api/carts`

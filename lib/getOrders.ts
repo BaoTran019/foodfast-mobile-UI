@@ -1,10 +1,20 @@
 // lib/getOrders.ts
-import { initial_orders, order_items } from "@/assets/mock_data/orders";
+import { addOrder as addOrderAPI, fetchOrders } from "@/api/orderAPI";
 
-export const getOrdersByUser = (userId: string) => {
-  return initial_orders.filter(order => order.userId === userId);
+const userId = 2;
+
+export const getOrders = async () => {
+  const data = await fetchOrders();
+  // Lọc theo userId
+  return data.filter(order => order.userId === userId);
+}
+
+export const getOrderItemsByOrderId = async (orderId: number) => {
+  const data = await fetchOrders();
+  const order = data.find(order => order.orderId === orderId);
+  return order ? order.orderItems : [];
 };
 
-export const getOrderItemsByOrderId = (orderId: number) => {
-  return order_items.filter(item => item.orderId === orderId);
-};
+export const addOrder = async (userId: number, newOrder: any) => {
+  return await addOrderAPI(userId, newOrder);
+}
