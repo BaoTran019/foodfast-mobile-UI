@@ -1,95 +1,66 @@
-import { CartCustomization, CartStore } from "@/type";
+// cart.store.ts
+import { addToCartApi, clearCartApi, getCart, removeItemApi, updateQuantityApi } from "@/api/cartAPI";
+import useAuthStore from "@/store/auth.store";
+import { CartItemType, CartStore } from "@/type";
 import { create } from "zustand";
 
-function areCustomizationsEqual(
-    a: CartCustomization[] = [],
-    b: CartCustomization[] = []
-): boolean {
-    if (a.length !== b.length) return false;
-
-    const aSorted = [...a].sort((x, y) => x.id.localeCompare(y.id));
-    const bSorted = [...b].sort((x, y) => x.id.localeCompare(y.id));
-
-    return aSorted.every((item, idx) => item.id === bSorted[idx].id);
-}
-
 export const useCartStore = create<CartStore>((set, get) => ({
-    items: [],
+  items: [],
 
-    addItem: (item) => {
-        const customizations = item.customizations ?? [];
+  fetchCart: async () => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
 
-        const existing = get().items.find(
-            (i) =>
-                i.id === item.id &&
-                areCustomizationsEqual(i.customizations ?? [], customizations)
-        );
+    const data = await getCart(userId);
+    // map backend JSON sang CartItemType
+    const items: CartItemType[] = data.cartItems.map((item: any) => ({
+      id: item.productId,
+      name: item.productName,
+      price: item.price,
+      image: item.imageUrl,
+      quantity: item.quantity,
+    }));
+    set({ items });
+  },
 
-        if (existing) {
-            set({
-                items: get().items.map((i) =>
-                    i.id === item.id &&
-                    areCustomizationsEqual(i.customizations ?? [], customizations)
-                        ? { ...i, quantity: i.quantity + 1 }
-                        : i
-                ),
-            });
-        } else {
-            set({
-                items: [...get().items, { ...item, quantity: 1, customizations }],
-            });
-        }
-    },
+  addItem: async (productId) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+    await addToCartApi(userId, productId, 1);
+    await get().fetchCart();
+},
 
-    removeItem: (id, customizations = []) => {
-        set({
-            items: get().items.filter(
-                (i) =>
-                    !(
-                        i.id === id &&
-                        areCustomizationsEqual(i.customizations ?? [], customizations)
-                    )
-            ),
-        });
-    },
+increaseQty: async (productId) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+    await updateQuantityApi(userId, productId, 1);
+    await get().fetchCart();
+},
 
-    increaseQty: (id, customizations = []) => {
-        set({
-            items: get().items.map((i) =>
-                i.id === id &&
-                areCustomizationsEqual(i.customizations ?? [], customizations)
-                    ? { ...i, quantity: i.quantity + 1 }
-                    : i
-            ),
-        });
-    },
+decreaseQty: async (productId) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+    await updateQuantityApi(userId, productId, -1);
+    await get().fetchCart();
+},
 
-    decreaseQty: (id, customizations = []) => {
-        set({
-            items: get()
-                .items.map((i) =>
-                    i.id === id &&
-                    areCustomizationsEqual(i.customizations ?? [], customizations)
-                        ? { ...i, quantity: i.quantity - 1 }
-                        : i
-                )
-                .filter((i) => i.quantity > 0),
-        });
-    },
+removeItem: async (productId) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+    await removeItemApi(userId, productId);
+    await get().fetchCart();
+},
 
-    clearCart: () => set({ items: [] }),
+  clearCart: async () => {
 
-    getTotalItems: () =>
-        get().items.reduce((total, item) => total + item.quantity, 0),
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
 
-    getTotalPrice: () =>
-        get().items.reduce((total, item) => {
-            const base = item.price;
-            const customPrice =
-                item.customizations?.reduce(
-                    (s: number, c: CartCustomization) => s + c.price,
-                    0
-                ) ?? 0;
-            return total + item.quantity * (base + customPrice);
-        }, 0),
+    await clearCartApi(userId);
+    set({ items: [] });
+  },
+
+  getTotalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+
+  getTotalPrice: () => get().items.reduce((sum, i) => sum + i.quantity * i.price, 0),
 }));

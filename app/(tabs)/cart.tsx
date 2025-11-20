@@ -4,7 +4,8 @@ import CustomHeader from "@/components/CustomHeader";
 import { useCartStore } from "@/store/cart.store";
 import { PaymentInfoStripeProps } from "@/type";
 import { router } from "expo-router";
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
@@ -16,17 +17,42 @@ const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfo
 );
 
 const Cart = () => {
-  const { items, getTotalItems, getTotalPrice } = useCartStore();
+  const { items, getTotalItems, getTotalPrice, fetchCart } = useCartStore();
 
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
+  const userId = 1;
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        await fetchCart();
+      } catch (err) {
+        console.error("Fetch cart error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCart();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#FE8C00" />
+      </SafeAreaView>
+    );
+  }
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <FlatList
         data={items}
         renderItem={({ item }) => <CartItem item={item} />}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 112, paddingHorizontal: 20, paddingTop: 20 }}
         ListHeaderComponent={() => <CustomHeader title="Your Cart" />}
         ListEmptyComponent={() => (

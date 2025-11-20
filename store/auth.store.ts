@@ -16,9 +16,7 @@ type AuthState = {
 const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: true,   // mặc định luôn đăng nhập
     user: {                  // set user cố định
-        id: "user1",
-        name: "Nguyen Van A",
-        email: "user1@example.com"
+        id: 2
     } as User,
     isLoading: false,
 
@@ -33,9 +31,7 @@ const useAuthStore = create<AuthState>((set) => ({
         set({
             isAuthenticated: true,
             user: {
-                id: "user1",
-                name: "Nguyen Van A",
-                email: "user1@example.com"
+                id: 2
             } as User,
             isLoading: false
         });

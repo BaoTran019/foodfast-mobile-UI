@@ -9,20 +9,31 @@ import MenuCard from "@/components/MenuCard";
 import SearchBar from "@/components/SearchBar";
 import { getMenu } from "@/lib/getMenu";
 import { MenuItem } from "@/type";
-import { food_list } from "../../assets/assets";
 
 const Search = () => {
   const { category, query } = useLocalSearchParams<{ query: string; category: string }>();
   const [data, setData] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const categories = [...new Set(food_list.map((item) => item.category))];
+
+  const allCategories = ["Fried_Chicken", "Spaghetti", "Drink"];
+  const [categories, setCategories] = useState<string[]>(allCategories);
 
   useEffect(() => {
+  const fetchData = async () => {
     setLoading(true);
-    const res = getMenu(category, query);
-    setData(res);
+    // Lấy tất cả món, không filter category
+    const allData = await getMenu(undefined, query); 
+    setData(
+      category && category !== "All"
+        ? allData.filter(item => item.category === category)
+        : allData
+    );
     setLoading(false);
-  }, [category, query]);
+  };
+
+  fetchData();
+}, [category, query]);
+
 
   return (
     <SafeAreaView className="bg-white" style={{ flex: 1 }}>
@@ -36,7 +47,7 @@ const Search = () => {
             </View>
           );
         }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 0 }}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 128 }}

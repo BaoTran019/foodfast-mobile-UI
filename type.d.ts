@@ -1,7 +1,7 @@
 import { StyleProp, TextStyle } from 'react-native';
 
 export interface MenuItem {
-  id: string;
+  id: number;
   name: string;
   image: any;
   price: number;
@@ -16,10 +16,10 @@ export interface Category {
 }
 
 export interface User {
-  id: string;
-  name: string;
+  id: number;
+  /*name: string;
   email: string;
-  avatar?: string;
+  avatar?: string;*/
 }
 
 export interface CartCustomization {
@@ -30,21 +30,21 @@ export interface CartCustomization {
 }
 
 export interface CartItemType {
-  id: string; // menu item id
-  name: string;
-  price: number;
-  image: any;
+  id: number;          // productId từ backend
+  name: string;        // productName
+  price: number;       // price
+  image: string;       // imageUrl
   quantity: number;
-  customizations?: CartCustomization[];
 }
 
 export interface CartStore {
   items: CartItemType[];
-  addItem: (item: Omit<CartItemType, "quantity">) => void;
-  removeItem: (id: string, customizations: CartCustomization[]) => void;
-  increaseQty: (id: string, customizations: CartCustomization[]) => void;
-  decreaseQty: (id: string, customizations: CartCustomization[]) => void;
-  clearCart: () => void;
+  fetchCart: () => Promise<void>;
+  addItem: (productId: number, quantity?: number) => Promise<void>;
+  increaseQty: (productId: number) => Promise<void>;
+  decreaseQty: (productId: number) => Promise<void>;
+  removeItem: (productId: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   getTotalItems: () => number;
   getTotalPrice: () => number;
 }

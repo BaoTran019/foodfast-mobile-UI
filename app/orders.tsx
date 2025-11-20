@@ -1,35 +1,52 @@
 // app/(tabs)/orders.tsx
-import { food_list } from "@/assets/assets";
-import { getOrderItemsByOrderId, getOrdersByUser } from "@/lib/getOrders";
+import { getOrders } from "@/lib/getOrders";
 import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const statusColors: Record<string, string> = {
-  "new-orders": "#FFB74D", // cam nhạt
-  "in-progress": "#4FC3F7", // xanh dương
-  "on-delivery": "#BA68C8", // tím nhạt
+  "Pending": "#BA68C8", // tím nhạt
+  "Processing": "#FFB74D", // cam nhạt
+  "Delivering": "#4FC3F7", // xanh dương
   "ready": "#4DB6AC", // xanh lá mạ
-  "completed": "#81C784", // xanh lá sáng
-  "cancelled": "#E57373", // đỏ nhạt
+  "Completed": "#81C784", // xanh lá sáng
 };
 
 const Orders = () => {
   const params = useLocalSearchParams<{ userId: string }>();
   const userId = String(params.userId);
-  const orders = getOrdersByUser(userId);
+  const [orders, setOrders] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchUserOrders = async () => {
+      try {
+        const data = await getOrders();
+        setOrders(data);
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+      }
+    };
+
+    fetchUserOrders();
+  }, [userId]);
 
   const DELIVERY_FEE = 15000
 
-  const calculateTotal = (orderId: number) => {
-    const items = getOrderItemsByOrderId(orderId); // lấy danh sách order_items theo orderId
-    const subtotal = items.reduce((sum, item) => {
-      const product = food_list.find(f => f.id === item.itemId);
-      const price = product ? product.price : 0;
-      return sum + price * item.quantity;
-    }, 0);
-    return subtotal + DELIVERY_FEE;
-  };
+  const total = (price: number) => {
+    return price + DELIVERY_FEE
+  }
+
+  const formatDate = (isoDate: string) => {
+  return new Date(isoDate).toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
 
   const insets = useSafeAreaInsets();
 
@@ -71,9 +88,9 @@ const Orders = () => {
                     {item.status.replace("-", " ").toUpperCase()}
                   </Text>
                 </View>
-                <Text>Total: {calculateTotal(item.orderId).toLocaleString("vi-VN")}đ</Text>
-                <Text>Payment: {item.payment_method}</Text>
-                <Text>Date: {item.date}</Text>
+                <Text>Total: {total(item.totalPrice).toLocaleString("vi-VN")}đ</Text>
+                <Text>Payment: {item.paymentMethod}</Text>
+                <Text>Date: {formatDate(item.orderDate)}</Text>
               </View>
             </TouchableOpacity>
           )}
