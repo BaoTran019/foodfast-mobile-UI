@@ -61,7 +61,7 @@ const OrderDetail = () => {
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(item) => item.itemId}
+          keyExtractor={(item, index) => `${item.itemId}-${index}`}
           contentContainerStyle={{ padding: 20 }}
           ListHeaderComponent={() => (
 
