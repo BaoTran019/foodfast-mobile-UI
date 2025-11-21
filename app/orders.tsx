@@ -1,8 +1,9 @@
 // app/(tabs)/orders.tsx
 import { getOrders } from "@/lib/getOrders";
+import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const statusColors: Record<string, string> = {
@@ -15,21 +16,25 @@ const statusColors: Record<string, string> = {
 
 const Orders = () => {
   const params = useLocalSearchParams<{ userId: string }>();
-  const userId = String(params.userId);
   const [orders, setOrders] = useState<any[]>([]);
-  
-  useEffect(() => {
-    const fetchUserOrders = async () => {
-      try {
-        const data = await getOrders();
-        setOrders(data);
-      } catch (err) {
-        console.error("Failed to fetch orders:", err);
-      }
-    };
+  const [loading, setLoading] = useState(true);
 
-    fetchUserOrders();
-  }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserOrders = async () => {
+        try {
+          const data = await getOrders();
+          setOrders(data);
+        } catch (err) {
+          console.error("Failed to fetch orders:", err);
+        } finally {
+          setLoading(false); // kết thúc loading
+        }
+      };
+
+      fetchUserOrders();
+    }, [])
+  );
 
   const DELIVERY_FEE = 15000
 
@@ -38,14 +43,14 @@ const Orders = () => {
   }
 
   const formatDate = (isoDate: string) => {
-  return new Date(isoDate).toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+    return new Date(isoDate).toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
 
   const insets = useSafeAreaInsets();
@@ -57,7 +62,11 @@ const Orders = () => {
         <Text style={styles.backText}>← Back</Text>
       </TouchableOpacity>
 
-      {orders.length === 0 ? (
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B00" />
+        </View>
+      ) : orders.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No orders yet</Text>
         </View>
@@ -139,6 +148,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#2a59d1",
   },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  }
 
 });
 

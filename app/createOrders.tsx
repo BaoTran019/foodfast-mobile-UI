@@ -1,40 +1,48 @@
-import CustomButton from "@/components/CustomButton";
+import OrderButton from "@/components/CreateOrderButton";
+import { addOrder } from "@/lib/getOrders";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const PAYMENT_METHODS = ["COD", "VNPAY"] as const;
 
 const CreateOrder = () => {
-  const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "VNPAY">("COD");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (!customerName || !phone || !address) {
+  const [newOrder, setNewOrder] = useState({
+    recipientName: "",
+    recipientPhone: "",
+    shipping_address: "",
+    payment_method: "COD" as "COD" | "VNPAY",
+  })
+
+  const handleSubmit = async () => {
+    if (newOrder.recipientName === "" || newOrder.recipientPhone === "" || newOrder.shipping_address === "") {
       alert("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
+    console.log(newOrder)
 
-    const newOrder = {
-      customer: customerName,
-      phone,
-      address,
-      payment_method: paymentMethod,
-      date: new Date().toLocaleString(),
-    };
-
-    console.log("Order Created:", newOrder);
-    alert("Đơn hàng đã được tạo!");
+    try {
+      setLoading(true);
+      const res = await addOrder(newOrder);
+      console.log("Order Created:", res);
+      alert("Đơn hàng đã được tạo!");
+      router.push("../(tabs)/search");
+    } catch (err) {
+      console.error(err);
+      alert("Tạo đơn hàng thất bại!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const insets = useSafeAreaInsets();
@@ -44,9 +52,9 @@ const CreateOrder = () => {
       <Text style={styles.title}>Tạo Đơn Hàng</Text>
 
       {/* Nút quay lại */}
-                    <Text style={styles.backButton} onPress={() => router.back()}>
-                      ← Back
-                    </Text>
+      <Text style={styles.backButton} onPress={() => router.back()}>
+        ← Back
+      </Text>
 
       {/* BOX 1: Customer Info */}
       <View style={styles.card}>
@@ -57,8 +65,10 @@ const CreateOrder = () => {
           style={styles.input}
           placeholder="Ví dụ: Nguyễn Văn A"
           placeholderTextColor="#9CA3AF"
-          value={customerName}
-          onChangeText={setCustomerName}
+          value={newOrder.recipientName}
+          onChangeText={(text) =>
+            setNewOrder((prev) => ({ ...prev, recipientName: text }))
+          }
         />
 
         <Text style={styles.label}>Số điện thoại</Text>
@@ -66,9 +76,11 @@ const CreateOrder = () => {
           style={styles.input}
           placeholder="Nhập số điện thoại"
           placeholderTextColor="#9CA3AF"
-          value={phone}
+          value={newOrder.recipientPhone}
           keyboardType="phone-pad"
-          onChangeText={setPhone}
+          onChangeText={(text) =>
+            setNewOrder((prev) => ({ ...prev, recipientPhone: text }))
+          }
         />
 
         <Text style={styles.label}>Địa chỉ</Text>
@@ -76,8 +88,10 @@ const CreateOrder = () => {
           style={[styles.input, { height: 70, textAlignVertical: "top" }]}
           placeholder="Nhập địa chỉ giao hàng"
           placeholderTextColor="#9CA3AF"
-          value={address}
-          onChangeText={setAddress}
+          value={newOrder.shipping_address}
+          onChangeText={(text) =>
+            setNewOrder((prev) => ({ ...prev, shipping_address: text }))
+          }
           multiline
         />
       </View>
@@ -92,14 +106,14 @@ const CreateOrder = () => {
               key={m}
               style={[
                 styles.paymentOption,
-                paymentMethod === m && styles.paymentOptionActive,
+                newOrder.payment_method === m && styles.paymentOptionActive,
               ]}
-              onPress={() => setPaymentMethod(m)}
+              onPress={() => setNewOrder((prev) => ({ ...prev, payment_method: m }))}
             >
               <Text
                 style={[
                   styles.paymentText,
-                  paymentMethod === m && { color: "#fff" },
+                  newOrder.payment_method === m && { color: "#fff" },
                 ]}
               >
                 {m}
@@ -110,10 +124,11 @@ const CreateOrder = () => {
       </View>
 
       {/* BUTTON */}
-      <CustomButton
-              title="Complete Order"
-              onPress={handleSubmit}
-            />
+      <OrderButton
+        title="Complete Order"
+        onPress={handleSubmit}
+        loading={loading}
+      />
     </SafeAreaView>
   );
 };
@@ -218,7 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
   },
-  
+
   backButton: {
     fontSize: 16,
     marginBottom: 8,
