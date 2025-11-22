@@ -17,8 +17,8 @@ const Profile = () => {
                     source={{ uri: "https://i.pravatar.cc/150?u=" + user.id }}
                     style={styles.avatar}
                 />
-                <Text style={styles.name}>Nguyễn Văn A</Text>
-                <Text style={styles.email}>a@gmail.com</Text>
+                <Text style={styles.name}>{user.fullName}</Text>
+                <Text style={styles.email}>{user.email}</Text>
             </View>
 
             {/* Menu Section */}
@@ -32,8 +32,12 @@ const Profile = () => {
                         })
                     }
                 />
+                <ProfileItem 
+                    label="My Information"
+                    onPress={() =>
+                        router.push("../Profile_Info")
+                    } />
                 <ProfileItem label="Help & Support" />
-                <ProfileItem label="Settings" />
             </View>
 
             {/* Logout */}

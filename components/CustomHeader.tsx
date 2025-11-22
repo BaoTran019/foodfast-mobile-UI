@@ -15,7 +15,6 @@ const CustomHeader = ({ title }: CustomHeaderProps) => {
           style={styles.backIcon}
           resizeMode="contain"
         />
-        <Text style={styles.backText}>Menu</Text>
       </TouchableOpacity>
 
       {/* Title in center absolutely */}

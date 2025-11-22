@@ -3,22 +3,27 @@ import { getOrders } from "@/lib/getOrders";
 import temp_img from "@/public/menu/chickens/combo_1_mieng_ga_gion.jpg";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, Image, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 
 const OrderDetail = () => {
-  const params = useLocalSearchParams<{ orderId: string }>();
-  const orderId = Number(params.orderId);
+
+  const params = useLocalSearchParams<{ orderId?: string }>();
+  const orderId = Number(params.orderId ?? 0);
+
   const [order, setOrder] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const insets = useSafeAreaInsets(); // luôn gọi đầu component
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const [orders, menu] = await Promise.all([
           getOrders(),
-          getMenu()       
+          getMenu()
         ]);
         const currentOrder = orders.find(o => o.orderId === orderId);
         if (currentOrder) {
@@ -32,6 +37,8 @@ const OrderDetail = () => {
         }
       } catch (err) {
         console.error("Failed to fetch order:", err);
+      } finally {
+        setLoading(false)
       }
     };
 
@@ -51,90 +58,89 @@ const OrderDetail = () => {
   const subtotal = (price: number, quantity: number) => price * quantity;
   const total = order.totalPrice + DELIVERY_FEE;
 
-  const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-      {items.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No items in this order</Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B00" />
         </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item, index) => `${item.itemId}-${index}`}
-          contentContainerStyle={{ padding: 20 }}
-          ListHeaderComponent={() => (
+      )
+        : (
+          <FlatList
+            data={items}
+            keyExtractor={(item, index) => `${item.itemId}-${index}`}
+            contentContainerStyle={{ padding: 20 }}
+            ListHeaderComponent={() => (
 
-            <>
-              {/* Nút quay lại */}
-              <Text style={styles.backButton} onPress={() => router.back()}>
-                ← Back
-              </Text>
+              <>
+                {/* Nút quay lại */}
+                <Text style={styles.backButton} onPress={() => router.back()}>
+                  ← Back
+                </Text>
 
-              <View style={styles.headerBox}>
+                <View style={styles.headerBox}>
 
-                <Text style={styles.headerText}>Order #{order.orderId}</Text>
+                  <Text style={styles.headerText}>Order #{order.orderId}</Text>
 
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Customer:</Text>
-                  <Text style={styles.infoValue}>{order.recipientName}</Text>
-                </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Customer:</Text>
+                    <Text style={styles.infoValue}>{order.recipientName}</Text>
+                  </View>
 
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Phone:</Text>
-                  <Text style={styles.infoValue}>{order.recipientPhone}</Text>
-                </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Phone:</Text>
+                    <Text style={styles.infoValue}>{order.recipientPhone}</Text>
+                  </View>
 
-                {order.address && (
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Address:</Text>
-                    <Text style={styles.infoValue}>{order.address}</Text>
+                    <Text style={styles.infoValue}>{order.deliveryAddress}</Text>
                   </View>
-                )}
-              </View>
-            </>
-          )}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Image
-                source={temp_img}
-                style={styles.image}
-                resizeMode="contain"
-              />
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.name}>{item.productName}</Text>
-                <Text>Quantity: {item.quantity}</Text>
-                <Text>Price: {(item.price || 0).toLocaleString("vi-VN")}đ</Text>
-                <Text>Subtotal: {subtotal(item.price, item.quantity).toLocaleString("vi-VN")}đ</Text>
-              </View>
-            </View>
-          )}
-          ListFooterComponent={() => (
-            <View style={styles.footerBox}>
-              <View style={styles.footerRow}>
-                <Text style={styles.footerLabel}>Items total:</Text>
-                <Text style={styles.footerValue}>
-                  {order.totalPrice.toLocaleString("vi-VN")}đ
-                </Text>
-              </View>
 
-              <View style={styles.footerRow}>
-                <Text style={styles.footerLabel}>Delivery fee:</Text>
-                <Text style={styles.footerValue}>
-                  {DELIVERY_FEE.toLocaleString("vi-VN")}đ
-                </Text>
+                </View>
+              </>
+            )}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Image
+                  source={temp_img}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.name}>{item.productName}</Text>
+                  <Text>Quantity: {item.quantity}</Text>
+                  <Text>Price: {(item.price || 0).toLocaleString("vi-VN")}đ</Text>
+                  <Text>Subtotal: {subtotal(item.price, item.quantity).toLocaleString("vi-VN")}đ</Text>
+                </View>
               </View>
+            )}
+            ListFooterComponent={() => (
+              <View style={styles.footerBox}>
+                <View style={styles.footerRow}>
+                  <Text style={styles.footerLabel}>Items total:</Text>
+                  <Text style={styles.footerValue}>
+                    {order.totalPrice.toLocaleString("vi-VN")}đ
+                  </Text>
+                </View>
 
-              <View style={styles.footerRowTotal}>
-                <Text style={styles.footerLabelTotal}>Total:</Text>
-                <Text style={styles.footerValueTotal}>
-                  {total.toLocaleString("vi-VN")}đ
-                </Text>
+                <View style={styles.footerRow}>
+                  <Text style={styles.footerLabel}>Delivery fee:</Text>
+                  <Text style={styles.footerValue}>
+                    {DELIVERY_FEE.toLocaleString("vi-VN")}đ
+                  </Text>
+                </View>
+
+                <View style={styles.footerRowTotal}>
+                  <Text style={styles.footerLabelTotal}>Total:</Text>
+                  <Text style={styles.footerValueTotal}>
+                    {total.toLocaleString("vi-VN")}đ
+                  </Text>
+                </View>
               </View>
-            </View>
-          )}
-        />
-      )}
+            )}
+          />
+        )}
     </SafeAreaView>
   );
 };
@@ -222,6 +228,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  }
 
 });
 

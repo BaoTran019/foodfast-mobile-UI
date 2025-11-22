@@ -17,9 +17,10 @@ export interface Category {
 
 export interface User {
   id: number;
-  /*name: string;
+  fullName: string;
   email: string;
-  avatar?: string;*/
+  phone: string;
+  address: string;
 }
 
 export interface CartCustomization {

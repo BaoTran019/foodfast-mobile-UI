@@ -1,4 +1,5 @@
 // app/(tabs)/orders.tsx
+import CustomHeader from "@/components/CustomHeader";
 import { getOrders } from "@/lib/getOrders";
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
@@ -56,11 +57,9 @@ const Orders = () => {
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top+10 }]}>
 
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
+      <CustomHeader title="My Orders"/>
 
       {loading ? (
         <View style={styles.loadingContainer}>

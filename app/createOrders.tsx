@@ -1,5 +1,6 @@
 import OrderButton from "@/components/CreateOrderButton";
 import { addOrder } from "@/lib/getOrders";
+import useAuthStore from "@/store/auth.store";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -17,10 +18,12 @@ const PAYMENT_METHODS = ["COD", "VNPAY"] as const;
 const CreateOrder = () => {
   const [loading, setLoading] = useState(false);
 
+  const { user } = useAuthStore();
+
   const [newOrder, setNewOrder] = useState({
-    recipientName: "",
-    recipientPhone: "",
-    shipping_address: "",
+    recipientName: user?.fullName || "",
+    recipientPhone: user?.phone || "",
+    shipping_address: user?.address || "",
     payment_method: "COD" as "COD" | "VNPAY",
   })
 
