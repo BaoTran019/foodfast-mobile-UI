@@ -1,14 +1,16 @@
 // screens/ProfileScreen.tsx
+import ChangePasswordModal from "@/components/ChangePwdModal";
 import CustomHeader from "@/components/CustomHeader";
 import useAuthStore from "@/store/auth.store";
 import React, { useState } from "react";
 import {
-    ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View
+  ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ProfileScreen = () => {
   const { user, changeInfo, isLoading, fetchAuthenticatedUser } = useAuthStore();
+  const [showChangePwd, setShowChangePwd] = useState(false);
 
   const [profile, setProfile] = useState({
     fullName: user?.fullName || "",
@@ -91,6 +93,17 @@ const ProfileScreen = () => {
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
         {saving ? <ActivityIndicator size="small" /> : <Text style={styles.saveText}>Lưu thông tin</Text>}
       </TouchableOpacity>
+      <TouchableOpacity style={[styles.saveBtn, { backgroundColor: "#FF5C5C" }]} onPress={() => setShowChangePwd(true)}>
+        <Text style={styles.saveText}>Đổi mật khẩu</Text>
+      </TouchableOpacity>
+
+      {showChangePwd && (
+        <ChangePasswordModal
+          show={showChangePwd}
+          handleCloseModal={() => setShowChangePwd(false)}
+          userPhone={user?.phone} // truyền số điện thoại user
+        />
+      )}
     </ScrollView>
   );
 };
