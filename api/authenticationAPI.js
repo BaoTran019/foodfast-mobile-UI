@@ -1,4 +1,3 @@
-import { address } from 'framer-motion/client'
 import config from './config.json'
 
 const { SERVER_API } = config
